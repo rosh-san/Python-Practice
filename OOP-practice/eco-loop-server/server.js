@@ -2,6 +2,16 @@ const crypto = require('crypto');
 const express = require('express');
 const app = express();
 
+const pool = require('./db');
+
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('[Database Error]: Connection failed.', err.stack);
+    } else {
+        console.log('[System]: Successfully connected to PostgreSQL database at', res.rows[0].now);
+    }
+});
+
 app.use(express.json());
 
 const PORT = 3000;
@@ -24,30 +34,44 @@ app.get('/api/system-status', (req, res) => {
     });
 });
 
-app.post('/api/request-pickup', (req, res) => {
-    const enrichedData = {
-        ticketId: crypto.randomUUID(),
-        status: "Pending",
-        requestDetails: req.body
-    };
+app.post('/api/request-pickup', async (req, res) => { // async tells the server to wait for the database to finish before responding.
+    try {
+        const ticketId = crypto.randomUUID();
+        
+        const sqlQuery = `
+            INSERT INTO pickups (id, user_name, address, item_description) 
+            VALUES ($1, $2, $3, $4) 
+            RETURNING *;
+        `;
+        
+        const values = [ticketId, req.body.user, req.body.address, req.body.item];
 
-    activePickup.push(enrichedData);
-    
-    res.json({
-        message: "Pickup scheduled.",
-        activePickups: activePickup,
-        receivedData: enrichedData
-    });
+        const newTicket = await pool.query(sqlQuery, values); // await tell the server to wait at this exact line.
+
+        res.json({
+            message: "Pickup permanently saved to PostgreSQL.",
+            ticket: newTicket.rows[0]
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database transaction failed" });
+    }
 });
 
-app.get('/api/view-pickups', (req, res) => {
-    res.json({
-        activePickups: activePickup
-    });
-});
+app.get('/api/view-pickups', async(req, res) => {
+    try{
+        const sqlQuery = 'SELECT * FROM pickups;';
 
-app.listen(PORT, () => {
-    console.log(`[System]: Eco-Loop server is currently running on http://localhost:${PORT}`);
+        const result = await pool.query(sqlQuery)
+
+        res.json({
+            activePickups: result.rows
+        });
+    } catch (error) {
+        console.error(error);
+            res.status(500).json({ error: "Database failed."})
+    }
 });
 
 app.patch('/api/accept-pickup/:id', (req, res) => {
@@ -64,4 +88,8 @@ app.patch('/api/accept-pickup/:id', (req, res) => {
             message: `Pickup with ID ${pickupId} not found.`
         });
     }
+});
+
+app.listen(PORT, () => {
+    console.log(`[System]: Eco-Loop server is currently running on http://localhost:${PORT}`);
 });
