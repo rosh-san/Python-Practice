@@ -16,8 +16,6 @@ app.use(express.json());
 
 const PORT = 3000;
 
-const activePickup = [];
-
 app.get('/', (req, res) => {
     res.send('Welcome to the Eco-Loop API Core. The server is live.');
 });
@@ -74,19 +72,31 @@ app.get('/api/view-pickups', async(req, res) => {
     }
 });
 
-app.patch('/api/accept-pickup/:id', (req, res) => {
-    const pickupId = req.params.id;
-    const ticket = activePickup.find(t => t.ticketId === req.params.id);
-    if (ticket) {
-        ticket.status = "Accepted by NGO";
+app.patch('/api/accept-pickup/:id' , async(req, res) => {
+    try{
+        const sqlQuery = `
+            UPDATE pickups 
+            SET status = 'Accepted by NGO' 
+            WHERE id = $1 
+            RETURNING *;
+        `;
+
+        const values = [req.params.id];
+
+        const result = await pool.query(sqlQuery, values);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: "Ticket not found." });
+        }
+
         res.json({
-            message: `Pickup with ID ${pickupId} has been accepted.`,
-            updatedTicket: ticket
+            message: "Pickup has been officially accepted.",
+            updatedTicket: result.rows[0]
         });
-    } else {
-        res.status(404).json({
-            message: `Pickup with ID ${pickupId} not found.`
-        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database update failed." });
     }
 });
 
