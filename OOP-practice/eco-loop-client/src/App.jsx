@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
+import NgoDashboard from './NgoDashboard';
 
 function App() {
-  // 1. STATE: Temporary memory to hold what the user types
   const [userName, setUserName] = useState('');
   const [address, setAddress] = useState('');
   const [item, setItem] = useState('');
 
-  // 2. THE ENGINE: What happens when they click Submit?
   const submitRequest = async (e) => {
     e.preventDefault(); // Stops the page from automatically refreshing
 
-    // Pack the data exactly how your backend expects it in req.body
+    // Pack the data exactly how the backend expects it in req.body
     const ticketData = {
       user: userName,
       address: address,
@@ -36,7 +35,7 @@ function App() {
     }
   };
 
-  // 3. THE UI: What the user actually sees (JSX)
+  // THE UI
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       <h1>Eco-Loop: Schedule a Pickup</h1>
@@ -46,7 +45,7 @@ function App() {
         
         <input 
           type="text" 
-          placeholder="Your Name (e.g. Alice)" 
+          placeholder="Your Full Name" 
           value={userName}
           onChange={(e) => setUserName(e.target.value)} 
           required 
@@ -70,6 +69,7 @@ function App() {
         
         <button type="submit">Submit Request</button>
       </form>
+      <NgoDashboard />
     </div>
   );
 }
