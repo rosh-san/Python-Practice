@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 
-function UserPotal() {
+function UserPortal() {
   const [userName, setUserName] = useState('');
   const [address, setAddress] = useState('');
   const [item, setItem] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submitRequest = async (e) => {
     e.preventDefault(); // Stops the page from automatically refreshing
@@ -15,6 +16,8 @@ function UserPotal() {
       item: item
     };
 
+    setIsSubmitting(true);
+
     try {
       // Send the POST request across the bridge to Port 3000
       const response = await fetch('http://localhost:3000/api/request-pickup', {
@@ -24,23 +27,29 @@ function UserPotal() {
         },
         body: JSON.stringify(ticketData)
       });
-
       const result = await response.json();
+
+      setUserName('');
+      setAddress('');
+      setItem('');
+      
       console.log("Success:", result);
       alert("Pickup Requested Successfully!"); // A simple popup for the user
       
     } catch (error) {
       console.error("Connection failed:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // THE UI
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>Eco-Loop: Schedule a Pickup</h1>
+    <div className='page-container'>
+      <h1 style={{ color: '#1a4a38', marginBottom: '10px' }} >Eco-Loop: Schedule a Pickup</h1>
       
       {/* When the form submits, it runs the Engine function above */}
-      <form onSubmit={submitRequest} style={{ display: 'flex', flexDirection: 'column', width: '300px', gap: '10px' }}>
+      <form onSubmit={submitRequest} className='modern-form'>
         
         <input 
           type="text" 
@@ -66,10 +75,11 @@ function UserPotal() {
           required 
         />
         
-        <button type="submit">Submit Request</button>
+        <button type="submit" className='btn-primary' disabled={isSubmitting} style={{opacity: isSubmitting ? 0.7 : 1 }}
+          > {isSubmitting ? 'Routing to NGO...' : 'Submit Request'} </button>
       </form>
     </div>
   );
 }
 
-export default UserPotal;
+export default UserPortal;

@@ -37,21 +37,29 @@ function NgoDashboard() {
 
   // The UI.
   return (
-    <div style={{ marginTop: '40px', padding: '20px', borderTop: '2px solid #333' }}>
-      <h2>Green Earth Foundation: Active Requests</h2>
+    <div className='page-container'>
+      <h2 style={{ color: '#1a4a38', marginBottom: '20px' }} >Green Earth Foundation: Active Requests</h2>
       
       {pickups.length === 0 ? (
-        <p>No active pickups right now.</p>
+        <p style={{ color: '#64748b' }}>No active pickups right now.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '300px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
           
           {/* The Map: For every ticket in memory, generate this HTML block */}
           {pickups.map((ticket) => (
-            <div key={ticket.id} style={{ border: '1px solid black', padding: '10px', borderRadius: '5px' }}>
-              <p style={{ margin: '5px 0' }}><strong>User:</strong> {ticket.user_name}</p>
-              <p style={{ margin: '5px 0' }}><strong>Item:</strong> {ticket.item_description}</p>
-              <p style={{ margin: '5px 0' }}><strong>Status:</strong> {ticket.status || 'Pending'}</p>
+            <div key={ticket.id} style={{ border: '1px solid #e2e8f0', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)'}}>
               
+              <p style={{ margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 'bold' }}>{ticket.user_name}</p>
+              <p style={{ margin: '5px 0', color: '#475569' }}><strong>Item:</strong> {ticket.item_description}</p>
+              <p style={{ margin: '5px 0', color: '#475569' }}><strong>Status:</strong> 
+                <span style={{ 
+                  color: ticket.status === 'Accepted by NGO' ? '#16a34a' : '#d97706',
+                  fontWeight: 'bold',
+                  marginLeft: '5px'
+                }}>
+                  {ticket.status || 'Pending'}
+                </span>
+              </p>
               {/* Only show the button if it hasn't been accepted yet */}
               {ticket.status !== 'Accepted by NGO' && (
                 <button onClick={() => acceptPickup(ticket.id)} style={{ marginTop: '10px' }}>
