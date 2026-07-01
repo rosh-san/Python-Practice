@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import TicketCard from './ticketCard';
 
 function NgoDashboard() {
   // State to hold the array of tickets from PostgreSQL
@@ -45,28 +46,13 @@ function NgoDashboard() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
           
-          {/* The Map: For every ticket in memory, generate this HTML block */}
+          {/* The Map: Pass the data into the Props! */}
           {pickups.map((ticket) => (
-            <div key={ticket.id} style={{ border: '1px solid #e2e8f0', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)'}}>
-              
-              <p style={{ margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 'bold' }}>{ticket.user_name}</p>
-              <p style={{ margin: '5px 0', color: '#475569' }}><strong>Item:</strong> {ticket.item_description}</p>
-              <p style={{ margin: '5px 0', color: '#475569' }}><strong>Status:</strong> 
-                <span style={{ 
-                  color: ticket.status === 'Accepted by NGO' ? '#16a34a' : '#d97706',
-                  fontWeight: 'bold',
-                  marginLeft: '5px'
-                }}>
-                  {ticket.status || 'Pending'}
-                </span>
-              </p>
-              {/* Only show the button if it hasn't been accepted yet */}
-              {ticket.status !== 'Accepted by NGO' && (
-                <button onClick={() => acceptPickup(ticket.id)} style={{ marginTop: '10px' }}>
-                  Accept Pickup
-                </button>
-              )}
-            </div>
+            <TicketCard 
+              key={ticket.id} 
+              ticket={ticket}          // Passing the data
+              onAccept={acceptPickup}  // Passing the engine function
+            />
           ))}
           
         </div>
