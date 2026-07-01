@@ -12,7 +12,7 @@ function NgoDashboard() {
   // Read the database
   const fetchTickets = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/view-pickups');
+      const response = await fetch('https://python-practice-ttra.onrender.com/api/view-pickups');
       const data = await response.json();
       setPickups(data.activePickups); // Save the DB rows into React memory.
     } catch (error) {
@@ -23,7 +23,7 @@ function NgoDashboard() {
   // The PATCH Route: Accept a ticket.
   const acceptPickup = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/accept-pickup/${id}`, {
+      const response = await fetch(`https://python-practice-ttra.onrender.com/api/accept-pickup/${id}`, {
         method: 'PATCH'
       });
       
