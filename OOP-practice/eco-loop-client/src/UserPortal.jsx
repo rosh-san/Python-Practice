@@ -20,7 +20,7 @@ function UserPortal() {
 
     try {
       // Send the POST request across the bridge to Port 3000
-      const response = await fetch('http://localhost:3000/api/request-pickup', {
+      const response = await fetch('https://python-practice-ttra.onrender.com/api/request-pickup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
