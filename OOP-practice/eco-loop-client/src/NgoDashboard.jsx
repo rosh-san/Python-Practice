@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import TicketCard from './ticketCard';
+import TicketCard from './TicketCard';
 
 function NgoDashboard() {
   // State to hold the array of tickets from PostgreSQL
