@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -35,23 +34,14 @@ app.get('/api/system-status', (req, res) => {
 });
 
 app.post('/api/request-pickup', async (req, res) => { // async tells the server to wait for the database to finish before responding.
-    try {
-        const ticketId = crypto.randomUUID();
-        
-        const sqlQuery = `
-            INSERT INTO pickups (id, user_name, address, item_description) 
-            VALUES ($1, $2, $3, $4) 
-            RETURNING *;
-        `;
-        
-        const values = [ticketId, req.body.user, req.body.address, req.body.item];
+    try {      
+        const { user, address, item } = req.body;
 
-        const newTicket = await pool.query(sqlQuery, values); // await tell the server to wait at this exact line.
-
-        res.json({
-            message: "Pickup permanently saved to PostgreSQL.",
-            ticket: newTicket.rows[0]
-        });
+        const newTicket = await pool.query(
+            "INSERT INTO pickups (user_name, address, item_description) VALUES ($1, $2, $3) RETURNING *",
+            [user, address, item]
+        );
+        res.json(newTicket.rows[0]);
 
     } catch (error) {
         console.error(error);
@@ -76,25 +66,17 @@ app.get('/api/view-pickups', async(req, res) => {
 
 app.patch('/api/accept-pickup/:id' , async(req, res) => {
     try{
-        const sqlQuery = `
-            UPDATE pickups 
-            SET status = 'Accepted by NGO' 
-            WHERE id = $1 
-            RETURNING *;
-        `;
+        const { id } = req.params;
 
-        const values = [req.params.id];
+        const updatedTicket = await pool.query("UPDATE pickups SET status = 'Accepted by NGO' WHERE id = $1 RETURNING *",
+            [id] // injecting the URL id into SQL query.
+            );
 
-        const result = await pool.query(sqlQuery, values);
-
-        if (result.rowCount === 0) {
+        if (updatedTicket.rowCount === 0) {
             return res.status(404).json({ message: "Ticket not found." });
         }
 
-        res.json({
-            message: "Pickup has been officially accepted.",
-            updatedTicket: result.rows[0]
-        });
+        res.json(updatedTicket.rows[0]);
 
     } catch (error) {
         console.error(error);

@@ -27,6 +27,9 @@ function UserPortal() {
         },
         body: JSON.stringify(ticketData)
       });
+      if (!response.ok){
+        throw new Error('Server rejected the request.')
+      }
       const result = await response.json();
 
       setUserName('');
@@ -38,6 +41,7 @@ function UserPortal() {
       
     } catch (error) {
       console.error("Connection failed:", error);
+      alert("Error: Could not submit ticket.")
     } finally {
       setIsSubmitting(false);
     }
